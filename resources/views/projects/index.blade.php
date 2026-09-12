@@ -1,7 +1,10 @@
 <x-app-layout title="Project">
-    <div class="mb-5 flex items-center justify-between gap-3">
-        <h1 class="page-title">Project</h1>
-        <div class="flex items-center gap-2">
+    <div class="mb-5 flex items-start justify-between gap-3">
+        <div class="min-w-0">
+            <h1 class="page-title">Project</h1>
+            <p class="muted mt-1">Semangat cintaku sayang</p>
+        </div>
+        <div class="flex shrink-0 items-center gap-2">
             <a href="{{ route('prices.index') }}" class="btn btn-secondary">
                 <svg class="size-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M3 11V5a2 2 0 0 1 2-2h6l10 10-8 8L3 11Z"/><circle cx="7.5" cy="7.5" r="1.25" fill="currentColor" stroke="none"/>
