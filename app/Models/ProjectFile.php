@@ -48,6 +48,7 @@ class ProjectFile extends Model
         'category',
         'original_name',
         'file_path',
+        'drive_url',
         'extension',
         'size',
     ];
@@ -78,8 +79,17 @@ class ProjectFile extends Model
         return self::CATEGORY_LABELS[$this->category];
     }
 
+    public function getIsLinkAttribute(): bool
+    {
+        return $this->file_path === null;
+    }
+
     public function getPreviewKindAttribute(): ?string
     {
+        if ($this->is_link) {
+            return null;
+        }
+
         return self::PREVIEW_KINDS[$this->category] ?? null;
     }
 

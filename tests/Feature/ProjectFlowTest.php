@@ -5,9 +5,11 @@ namespace Tests\Feature;
 use App\Models\PriceReference;
 use App\Models\Project;
 use App\Models\User;
+use App\Support\UploadLimits;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -167,7 +169,9 @@ class ProjectFlowTest extends TestCase
             ->get(route('projects.show', $project))
             ->assertOk()
             ->assertSee('Rumah Bu Sari')
-            ->assertSee('Berjalan');
+            ->assertSee('Berjalan')
+            ->assertSee('Unggah dari perangkat')
+            ->assertSee('Ambil dari Google Drive');
     }
 
     public function test_dashboard_filters_by_search_and_status(): void
@@ -235,6 +239,51 @@ class ProjectFlowTest extends TestCase
         $this->assertSame(0, $project->files()->count());
     }
 
+    public function test_upload_limit_follows_the_servers_own_php_setting(): void
+    {
+        Storage::fake('local');
+        $user = User::factory()->create();
+        $project = $user->projects()->create(['name' => 'Rumah Bu Sari', 'status' => 'berjalan']);
+
+        $limitKb = UploadLimits::maxFileKilobytes();
+
+        $this->actingAs($user)->post(route('projects.files.store', $project), [
+            'files' => [UploadedFile::fake()->create('BQ Besar.xlsx', $limitKb + 1024)],
+        ])->assertSessionHasErrors('files.0');
+
+        $this->assertSame(0, $project->files()->count());
+
+        $this->actingAs($user)
+            ->get(route('projects.show', $project))
+            ->assertSee(UploadLimits::readable(UploadLimits::maxFileBytes()));
+    }
+
+    public function test_drive_size_limit_is_configurable(): void
+    {
+        config(['datalaila.drive_max_mb' => 10]);
+        Storage::fake('local');
+        Http::fake([
+            'drive.usercontent.google.com/*' => Http::response('', 200, [
+                'Content-Type' => 'application/octet-stream',
+                'Content-Disposition' => 'attachment; filename="BQ.xlsx"',
+                'Content-Length' => (string) (20 * 1024 * 1024),
+            ]),
+        ]);
+
+        $user = User::factory()->create();
+        $project = $user->projects()->create(['name' => 'Rumah Bu Sari', 'status' => 'berjalan']);
+
+        $this->actingAs($user)->post(route('projects.files.drive', $project), [
+            'drive_url' => 'https://drive.google.com/file/d/1keAVp2xEFaUeiLK81Ld1m5v/view',
+            'mode' => 'download',
+        ])->assertSessionHasErrors('drive_url', null, 'drive');
+
+        $this->assertStringContainsString(
+            'melebihi batas 10 MB',
+            session('errors')->getBag('drive')->first('drive_url'),
+        );
+    }
+
     public function test_user_can_download_a_file_with_its_original_name(): void
     {
         Storage::fake('local');
@@ -249,6 +298,227 @@ class ProjectFlowTest extends TestCase
             ->get(route('files.download', $project->files()->first()))
             ->assertOk()
             ->assertDownload('BQ Rumah.xlsx');
+    }
+
+    public function test_file_can_be_imported_from_a_drive_link(): void
+    {
+        Storage::fake('local');
+        Http::fake([
+            'drive.usercontent.google.com/*' => Http::response('isi excel', 200, [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Content-Disposition' => 'attachment; filename="BQ Gym Somerset.xlsx"',
+            ]),
+        ]);
+
+        $user = User::factory()->create();
+        $project = $user->projects()->create(['name' => 'Rumah Bu Sari', 'status' => 'berjalan']);
+
+        $this->actingAs($user)->post(route('projects.files.drive', $project), [
+            'drive_url' => 'https://drive.google.com/file/d/1AbCdEfGhIjKlMnOpQrStUv/view?usp=sharing',
+            'mode' => 'download',
+        ])->assertRedirect();
+
+        $file = $project->files()->first();
+
+        $this->assertSame('BQ Gym Somerset.xlsx', $file->original_name);
+        $this->assertSame('bq_excel', $file->category);
+        Storage::disk('local')->assertExists($file->file_path);
+    }
+
+    public function test_large_cad_file_can_be_saved_as_a_link_without_downloading(): void
+    {
+        Storage::fake('local');
+        Http::fake([
+            'drive.usercontent.google.com/*' => Http::response('', 200, [
+                'Content-Type' => 'application/octet-stream',
+                'Content-Disposition' => 'attachment; filename="DENAH DETAIL TOILET.dwg"',
+                'Content-Length' => '119353330',
+            ]),
+        ]);
+
+        $user = User::factory()->create();
+        $project = $user->projects()->create(['name' => 'Rumah Bu Sari', 'status' => 'berjalan']);
+        $url = 'https://drive.google.com/file/d/1keAVp2xEFaUeiLK81Ld1m5v/view?usp=drive_link';
+
+        $this->actingAs($user)->post(route('projects.files.drive', $project), [
+            'drive_url' => $url,
+            'mode' => 'link',
+        ])->assertRedirect();
+
+        $file = $project->files()->first();
+
+        $this->assertTrue($file->is_link);
+        $this->assertNull($file->file_path);
+        $this->assertSame($url, $file->drive_url);
+        $this->assertSame('2d', $file->category);
+        $this->assertSame(119353330, $file->size);
+        $this->assertNull($file->preview_kind);
+
+        Storage::disk('local')->assertDirectoryEmpty('projects');
+        Http::assertSentCount(1);
+    }
+
+    public function test_oversized_file_is_refused_for_download_but_allowed_as_link(): void
+    {
+        Storage::fake('local');
+        Http::fake([
+            'drive.usercontent.google.com/*' => Http::response('', 200, [
+                'Content-Type' => 'application/octet-stream',
+                'Content-Disposition' => 'attachment; filename="Model Besar.skp"',
+                'Content-Length' => '524288000',
+            ]),
+        ]);
+
+        $user = User::factory()->create();
+        $project = $user->projects()->create(['name' => 'Rumah Bu Sari', 'status' => 'berjalan']);
+        $url = 'https://drive.google.com/file/d/1keAVp2xEFaUeiLK81Ld1m5v/view';
+
+        $this->actingAs($user)->post(route('projects.files.drive', $project), [
+            'drive_url' => $url,
+            'mode' => 'download',
+        ])->assertSessionHasErrors('drive_url', null, 'drive');
+
+        $this->assertSame(0, $project->files()->count());
+
+        $this->actingAs($user)->post(route('projects.files.drive', $project), [
+            'drive_url' => $url,
+            'mode' => 'link',
+        ])->assertRedirect();
+
+        $this->assertSame(1, $project->files()->count());
+    }
+
+    public function test_link_entry_cannot_be_downloaded_or_previewed(): void
+    {
+        $user = User::factory()->create();
+        $project = $user->projects()->create(['name' => 'Rumah Bu Sari', 'status' => 'berjalan']);
+        $file = $project->files()->create([
+            'category' => '2d',
+            'original_name' => 'Denah.dwg',
+            'file_path' => null,
+            'drive_url' => 'https://drive.google.com/file/d/1keAVp2xEFaUeiLK81Ld1m5v/view',
+            'extension' => 'dwg',
+            'size' => 119353330,
+        ]);
+
+        $this->actingAs($user)->get(route('files.download', $file))->assertNotFound();
+        $this->actingAs($user)->get(route('files.raw', $file))->assertNotFound();
+
+        $this->actingAs($user)->get(route('projects.show', $project))
+            ->assertOk()
+            ->assertSee('di Drive')
+            ->assertSee($file->drive_url, false);
+    }
+
+    public function test_deleting_a_link_entry_leaves_storage_untouched(): void
+    {
+        Storage::fake('local');
+        $user = User::factory()->create();
+        $project = $user->projects()->create(['name' => 'Rumah Bu Sari', 'status' => 'berjalan']);
+        $file = $project->files()->create([
+            'category' => '2d',
+            'original_name' => 'Denah.dwg',
+            'file_path' => null,
+            'drive_url' => 'https://drive.google.com/file/d/1keAVp2xEFaUeiLK81Ld1m5v/view',
+            'extension' => 'dwg',
+            'size' => 100,
+        ]);
+
+        $this->actingAs($user)->delete(route('files.destroy', $file))->assertRedirect();
+
+        $this->assertSame(0, $project->files()->count());
+    }
+
+    public function test_google_sheets_link_is_exported_as_excel(): void
+    {
+        Storage::fake('local');
+        Http::fake([
+            'docs.google.com/spreadsheets/*' => Http::response('isi export', 200, [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Content-Disposition' => 'attachment; filename="RAB Renovasi.xlsx"',
+            ]),
+        ]);
+
+        $user = User::factory()->create();
+        $project = $user->projects()->create(['name' => 'Rumah Bu Sari', 'status' => 'berjalan']);
+
+        $this->actingAs($user)->post(route('projects.files.drive', $project), [
+            'drive_url' => 'https://docs.google.com/spreadsheets/d/1AbCdEfGhIjKlMnOpQ/edit#gid=0',
+            'mode' => 'download',
+        ])->assertRedirect();
+
+        $this->assertSame('bq_excel', $project->files()->first()->category);
+    }
+
+    public function test_drive_folder_link_is_rejected_with_a_clear_message(): void
+    {
+        Http::fake();
+        $user = User::factory()->create();
+        $project = $user->projects()->create(['name' => 'Rumah Bu Sari', 'status' => 'berjalan']);
+
+        $this->actingAs($user)->post(route('projects.files.drive', $project), [
+            'drive_url' => 'https://drive.google.com/drive/folders/1AbCdEfGhIjKlMnOpQ',
+            'mode' => 'download',
+        ])->assertSessionHasErrors('drive_url', null, 'drive');
+
+        $this->assertSame(0, $project->files()->count());
+        Http::assertNothingSent();
+    }
+
+    public function test_restricted_drive_link_is_reported_as_access_problem(): void
+    {
+        Storage::fake('local');
+        Http::fake([
+            'drive.usercontent.google.com/*' => Http::response('<html>Sign in</html>', 200, [
+                'Content-Type' => 'text/html; charset=utf-8',
+            ]),
+        ]);
+
+        $user = User::factory()->create();
+        $project = $user->projects()->create(['name' => 'Rumah Bu Sari', 'status' => 'berjalan']);
+
+        $this->actingAs($user)->post(route('projects.files.drive', $project), [
+            'drive_url' => 'https://drive.google.com/file/d/1AbCdEfGhIjKlMnOpQrStUv/view',
+            'mode' => 'download',
+        ])->assertSessionHasErrors('drive_url', null, 'drive');
+
+        $this->assertSame(0, $project->files()->count());
+    }
+
+    public function test_drive_file_with_unsupported_extension_is_rejected(): void
+    {
+        Storage::fake('local');
+        Http::fake([
+            'drive.usercontent.google.com/*' => Http::response('MZ', 200, [
+                'Content-Type' => 'application/octet-stream',
+                'Content-Disposition' => 'attachment; filename="installer.exe"',
+            ]),
+        ]);
+
+        $user = User::factory()->create();
+        $project = $user->projects()->create(['name' => 'Rumah Bu Sari', 'status' => 'berjalan']);
+
+        $this->actingAs($user)->post(route('projects.files.drive', $project), [
+            'drive_url' => 'https://drive.google.com/file/d/1AbCdEfGhIjKlMnOpQrStUv/view',
+            'mode' => 'download',
+        ])->assertSessionHasErrors('drive_url', null, 'drive');
+
+        $this->assertSame(0, $project->files()->count());
+    }
+
+    public function test_drive_import_is_blocked_on_another_users_project(): void
+    {
+        Http::fake();
+        $owner = User::factory()->create();
+        $intruder = User::factory()->create();
+        $project = $owner->projects()->create(['name' => 'Rumah Bu Sari', 'status' => 'berjalan']);
+
+        $this->actingAs($intruder)->post(route('projects.files.drive', $project), [
+            'drive_url' => 'https://drive.google.com/file/d/1AbCdEfGhIjKlMnOpQrStUv/view',
+            'mode' => 'download',
+        ])->assertForbidden();
+
+        Http::assertNothingSent();
     }
 
     public function test_photo_is_served_inline_for_preview(): void

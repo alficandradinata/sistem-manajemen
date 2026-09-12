@@ -24,6 +24,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('projects', ProjectController::class);
 
     Route::post('projects/{project}/files', [ProjectFileController::class, 'store'])->name('projects.files.store');
+    Route::post('projects/{project}/files/drive', [ProjectFileController::class, 'storeFromDrive'])->name('projects.files.drive');
     Route::get('files/{file}/download', [ProjectFileController::class, 'download'])->name('files.download');
     Route::get('files/{file}/preview', [FilePreviewController::class, 'show'])->name('files.preview');
     Route::get('files/{file}/raw', [FilePreviewController::class, 'raw'])->name('files.raw');
