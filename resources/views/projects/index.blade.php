@@ -25,7 +25,7 @@
             <svg class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round">
                 <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
             </svg>
-            <input type="search" name="q" value="{{ request('q') }}" placeholder="Cari nama project"
+            <input type="search" name="q" value="{{ request('q') }}" placeholder="Cari nama project disini sayang"
                    class="field-input pl-9">
         </div>
 
