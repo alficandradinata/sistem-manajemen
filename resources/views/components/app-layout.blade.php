@@ -11,10 +11,10 @@
 </head>
 <body class="h-full">
     <div class="flex min-h-full flex-col">
-        <header class="sticky top-0 z-20 border-b border-stone-200 bg-white/90 backdrop-blur">
+        <header class="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
             <div class="mx-auto flex h-14 max-w-3xl items-center px-4">
                 <a href="{{ route('projects.index') }}"
-                   class="flex items-center gap-2.5 text-stone-900">
+                   class="flex items-center gap-2.5 text-slate-900">
                     <svg class="size-5" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.75"
                          stroke-linecap="round" stroke-linejoin="round">
                         <path d="M4 19 20 6l16 13"/>

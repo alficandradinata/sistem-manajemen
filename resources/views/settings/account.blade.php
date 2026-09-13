@@ -1,6 +1,6 @@
 <x-app-layout title="Akun">
     <a href="{{ route('projects.index') }}"
-       class="mb-4 inline-flex items-center gap-1 text-sm text-stone-500 hover:text-stone-900">
+       class="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900">
         <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
             <path d="m15 18-6-6 6-6"/>
         </svg>

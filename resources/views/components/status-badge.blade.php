@@ -5,7 +5,7 @@
         'berjalan' => 'bg-blue-50 text-blue-700 ring-blue-200',
         'pending' => 'bg-amber-50 text-amber-700 ring-amber-200',
         'selesai' => 'bg-emerald-50 text-emerald-700 ring-emerald-200',
-        'batal' => 'bg-stone-100 text-stone-500 ring-stone-200',
+        'batal' => 'bg-slate-100 text-slate-500 ring-slate-200',
     ];
 @endphp
 
