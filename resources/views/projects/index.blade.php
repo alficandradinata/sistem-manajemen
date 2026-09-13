@@ -2,7 +2,7 @@
     <div class="mb-5 flex items-start justify-between gap-3">
         <div class="min-w-0">
             <h1 class="page-title">Project</h1>
-            <p class="muted mt-1">Semangat cintaku sayang</p>
+            <p class="muted mt-1">Semangat cintaku sayang manja comel lucu gemes </p>
         </div>
         <div class="flex shrink-0 items-center gap-2">
             <a href="{{ route('prices.index') }}" class="btn btn-secondary">
