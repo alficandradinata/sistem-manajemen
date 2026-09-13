@@ -9,7 +9,7 @@
        value="{{ old('name', $project?->name) }}" class="field-input mb-4">
 
 <label for="deadline" class="field-label">
-    Deadline <span class="font-normal text-slate-400">— opsional</span>
+    Deadline <span class="font-normal text-stone-400">— opsional</span>
 </label>
 <input id="deadline" name="deadline" type="date"
        value="{{ old('deadline', $project?->deadline?->format('Y-m-d')) }}" class="field-input mb-4">

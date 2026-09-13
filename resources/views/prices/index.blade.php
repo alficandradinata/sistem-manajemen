@@ -9,7 +9,7 @@
 
     <form method="GET" class="mb-3">
         <div class="relative">
-            <svg class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round">
+            <svg class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-stone-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round">
                 <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
             </svg>
             <input type="search" name="q" value="{{ request('q') }}" placeholder="Cari nama barang"
@@ -19,14 +19,14 @@
 
     <details class="card mb-5"
              @if ($errors->any() || ($prices->isEmpty() && ! request('q'))) open @endif>
-        <summary class="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm font-medium text-slate-900">
-            <svg class="size-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round">
+        <summary class="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm font-medium text-stone-900">
+            <svg class="size-4 text-stone-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round">
                 <path d="M12 5v14M5 12h14"/>
             </svg>
             Tambah harga
         </summary>
 
-        <form method="POST" action="{{ route('prices.store') }}" class="border-t border-slate-100 p-4">
+        <form method="POST" action="{{ route('prices.store') }}" class="border-t border-stone-100 p-4">
             @csrf
 
             @if ($errors->any())
@@ -45,20 +45,20 @@
     @if ($prices->isNotEmpty())
         <div class="card overflow-hidden">
             @foreach ($prices as $price)
-                <details class="group border-b border-slate-100 last:border-0">
-                    <summary class="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 hover:bg-slate-50">
-                        <span class="min-w-0 truncate text-sm text-slate-800">{{ $price->name }}</span>
+                <details class="group border-b border-stone-100 last:border-0">
+                    <summary class="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 hover:bg-stone-50">
+                        <span class="min-w-0 truncate text-sm text-stone-800">{{ $price->name }}</span>
                         <span class="flex shrink-0 items-center gap-2">
-                            <span class="text-sm font-medium text-slate-900">
+                            <span class="text-sm font-medium text-stone-900">
                                 Rp{{ number_format($price->price, 0, ',', '.') }}
                             </span>
-                            <svg class="size-4 text-slate-400 transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <svg class="size-4 text-stone-400 transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="m6 9 6 6 6-6"/>
                             </svg>
                         </span>
                     </summary>
 
-                    <div class="border-t border-slate-100 bg-slate-50/60 p-4">
+                    <div class="border-t border-stone-100 bg-stone-50/60 p-4">
                         <form method="POST" action="{{ route('prices.update', $price) }}">
                             @csrf
                             @method('PUT')
