@@ -7,14 +7,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ? $title . ' — ' : '' }}Sistem Datalaila</title>
+    <script>
+        if (localStorage.theme === 'dark'
+            || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="h-full">
     <div class="flex min-h-full flex-col">
-        <header class="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
+        <header class="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
             <div class="mx-auto flex h-14 max-w-3xl items-center px-4">
                 <a href="{{ route('projects.index') }}"
-                   class="flex items-center gap-2.5 text-slate-900">
+                   class="flex items-center gap-2.5 text-slate-900 dark:text-slate-100">
                     <svg class="size-5" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.75"
                          stroke-linecap="round" stroke-linejoin="round">
                         <path d="M4 19 20 6l16 13"/>
@@ -24,6 +30,15 @@
                 </a>
 
                 <nav class="ml-auto flex items-center gap-0.5">
+                    <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Ganti mode terang/gelap">
+                        <svg id="theme-icon-light" class="size-5 dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="4"/>
+                            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+                        </svg>
+                        <svg id="theme-icon-dark" class="hidden size-5 dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/>
+                        </svg>
+                    </button>
                     <a href="{{ route('account.edit') }}" class="icon-btn" aria-label="Akun">
                         <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>
@@ -49,5 +64,12 @@
             {{ $slot }}
         </main>
     </div>
+
+    <script>
+        document.getElementById('theme-toggle').addEventListener('click', function () {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.theme = isDark ? 'dark' : 'light';
+        });
+    </script>
 </body>
 </html>

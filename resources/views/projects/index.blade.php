@@ -6,7 +6,7 @@
         </div>
         <div class="flex shrink-0 items-center gap-2">
             <a href="{{ route('prices.index') }}" class="btn btn-secondary">
-                <svg class="size-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <svg class="size-4 text-slate-400 dark:text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M3 11V5a2 2 0 0 1 2-2h6l10 10-8 8L3 11Z"/><circle cx="7.5" cy="7.5" r="1.25" fill="currentColor" stroke="none"/>
                 </svg>
                 Harga
@@ -22,7 +22,7 @@
 
     <form method="GET" class="mb-5">
         <div class="relative mb-3">
-            <svg class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round">
+            <svg class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round">
                 <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
             </svg>
             <input type="search" name="q" value="{{ request('q') }}" placeholder="Cari nama project disini sayang"
@@ -40,12 +40,12 @@
 
     @forelse ($projects as $project)
         <a href="{{ route('projects.show', $project) }}"
-           class="card mb-2 block px-4 py-3.5 transition-colors hover:border-slate-300 hover:bg-slate-50/60">
+           class="card mb-2 block px-4 py-3.5 transition-colors hover:border-slate-300 hover:bg-slate-50/60 dark:hover:border-slate-700 dark:hover:bg-slate-800/60">
             <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
-                    <h2 class="truncate font-medium text-slate-900">{{ $project->name }}</h2>
-                    <p class="mt-1 flex items-center gap-1.5 text-sm text-slate-500">
-                        <svg class="size-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round">
+                    <h2 class="truncate font-medium text-slate-900 dark:text-slate-100">{{ $project->name }}</h2>
+                    <p class="mt-1 flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
+                        <svg class="size-3.5 text-slate-400 dark:text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round">
                             <rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 11h18"/>
                         </svg>
                         {{ $project->deadline?->translatedFormat('d M Y') ?? 'Tanpa deadline' }}

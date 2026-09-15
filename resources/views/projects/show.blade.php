@@ -1,6 +1,6 @@
 <x-app-layout :title="$project->name">
     <a href="{{ route('projects.index') }}"
-       class="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900">
+       class="back-link">
         <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
             <path d="m15 18-6-6 6-6"/>
         </svg>
@@ -10,9 +10,9 @@
     <div class="card-pad mb-6">
         <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
-                <h1 class="text-xl font-semibold tracking-tight text-slate-900">{{ $project->name }}</h1>
-                <p class="mt-1.5 flex items-center gap-1.5 text-sm text-slate-500">
-                    <svg class="size-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round">
+                <h1 class="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">{{ $project->name }}</h1>
+                <p class="mt-1.5 flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
+                    <svg class="size-3.5 text-slate-400 dark:text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round">
                         <rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 11h18"/>
                     </svg>
                     {{ $project->deadline ? 'Deadline '.$project->deadline->translatedFormat('d M Y') : 'Tanpa deadline' }}
@@ -45,7 +45,8 @@
         </p>
         <input id="files" name="files[]" type="file" multiple required
                accept=".xls,.xlsx,.xlsm,.csv,.doc,.docx,.dwg,.dxf,.skp,.pdf,.jpg,.jpeg,.png,.webp"
-               class="mb-4 block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-900 file:px-4 file:py-2.5 file:text-sm file:font-medium file:text-white hover:file:bg-slate-700">
+               class="mb-4 block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-900 file:px-4 file:py-2.5 file:text-sm file:font-medium file:text-white hover:file:bg-slate-700
+               dark:text-slate-400 dark:file:bg-slate-100 dark:file:text-slate-900 dark:hover:file:bg-slate-300">
 
         <button type="submit" class="btn btn-primary btn-block">Unggah</button>
     </form>
@@ -56,8 +57,8 @@
         <label for="drive_url" class="field-label">Ambil dari Google Drive</label>
         <p class="field-hint">
             Tempel link file satuan yang disetel &ldquo;siapa saja yang punya link&rdquo;.
-            <span class="font-medium text-slate-700">Ambil file</span> menyalinnya ke sini agar bisa dipratinjau;
-            <span class="font-medium text-slate-700">Simpan link</span> hanya mencatat alamatnya — pilih itu untuk
+            <span class="font-medium text-slate-700 dark:text-slate-300">Ambil file</span> menyalinnya ke sini agar bisa dipratinjau;
+            <span class="font-medium text-slate-700 dark:text-slate-300">Simpan link</span> hanya mencatat alamatnya — pilih itu untuk
             file CAD besar yang memang dibuka di AutoCAD atau SketchUp.
         </p>
 
@@ -81,28 +82,28 @@
         @php $files = $filesByCategory[$key] ?? collect(); @endphp
 
         <section class="card mb-2 overflow-hidden">
-            <header class="flex items-center justify-between border-b border-slate-100 px-4 py-2.5">
-                <h3 class="text-sm font-medium text-slate-900">{{ $label }}</h3>
-                <span class="text-xs text-slate-400">{{ $files->count() }}</span>
+            <header class="flex items-center justify-between border-b border-slate-100 px-4 py-2.5 dark:border-slate-800">
+                <h3 class="text-sm font-medium text-slate-900 dark:text-slate-100">{{ $label }}</h3>
+                <span class="text-xs text-slate-400 dark:text-slate-500">{{ $files->count() }}</span>
             </header>
 
             @forelse ($files as $file)
-                <div class="flex items-center gap-3 border-b border-slate-100 px-4 py-3 last:border-0">
+                <div class="flex items-center gap-3 border-b border-slate-100 px-4 py-3 last:border-0 dark:border-slate-800">
                     @if ($file->preview_kind === 'image')
                         <a href="{{ route('files.preview', $file) }}" class="shrink-0">
                             <img src="{{ route('files.raw', $file) }}" alt=""
-                                 class="size-10 rounded-md border border-slate-200 bg-slate-100 object-cover">
+                                 class="size-10 rounded-md border border-slate-200 bg-slate-100 object-cover dark:border-slate-700 dark:bg-slate-800">
                         </a>
                     @endif
 
                     <div class="min-w-0 flex-1">
-                        <p class="truncate text-sm text-slate-800">{{ $file->original_name }}</p>
-                        <p class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-400">
+                        <p class="truncate text-sm text-slate-800 dark:text-slate-200">{{ $file->original_name }}</p>
+                        <p class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
                             @if ($file->size)
                                 <span>{{ $file->readable_size }}</span>
                             @endif
                             @if ($file->is_link)
-                                <span class="inline-flex items-center gap-1 rounded border border-slate-200 px-1.5 py-px text-[11px] text-slate-500">
+                                <span class="inline-flex items-center gap-1 rounded border border-slate-200 px-1.5 py-px text-[11px] text-slate-500 dark:border-slate-700 dark:text-slate-400">
                                     <svg class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
                                         <path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/>
                                     </svg>
@@ -152,7 +153,7 @@
                     </form>
                 </div>
             @empty
-                <p class="px-4 py-3 text-sm text-slate-400">Belum ada file.</p>
+                <p class="px-4 py-3 text-sm text-slate-400 dark:text-slate-500">Belum ada file.</p>
             @endforelse
         </section>
     @endforeach
