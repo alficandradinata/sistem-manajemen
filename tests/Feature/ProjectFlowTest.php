@@ -189,6 +189,86 @@ class ProjectFlowTest extends TestCase
             ->assertDontSee('Rumah Bu Sari');
     }
 
+    public function test_search_also_matches_file_names_across_projects(): void
+    {
+        Storage::fake('local');
+        $user = User::factory()->create();
+        $target = $user->projects()->create(['name' => 'Rumah Bu Sari', 'status' => 'berjalan']);
+        $user->projects()->create(['name' => 'Ruko Pak Budi', 'status' => 'berjalan']);
+
+        $this->actingAs($user)->post(route('projects.files.store', $target), [
+            'files' => [UploadedFile::fake()->create('Denah Toilet.dwg', 20)],
+        ]);
+
+        // Kata "toilet" tidak ada di nama project mana pun, hanya di nama berkas.
+        $this->actingAs($user)->get('/projects?q=toilet')
+            ->assertOk()
+            ->assertSee('Rumah Bu Sari')
+            ->assertSee('Denah Toilet.dwg')
+            ->assertDontSee('Ruko Pak Budi');
+    }
+
+    public function test_search_does_not_list_unrelated_files_of_a_matched_project(): void
+    {
+        Storage::fake('local');
+        $user = User::factory()->create();
+        $project = $user->projects()->create(['name' => 'Rumah Bu Sari', 'status' => 'berjalan']);
+
+        $this->actingAs($user)->post(route('projects.files.store', $project), [
+            'files' => [
+                UploadedFile::fake()->create('Denah Toilet.dwg', 20),
+                UploadedFile::fake()->create('BQ Rumah.xlsx', 12),
+            ],
+        ]);
+
+        $this->actingAs($user)->get('/projects?q=toilet')
+            ->assertSee('Denah Toilet.dwg')
+            ->assertDontSee('BQ Rumah.xlsx');
+    }
+
+    public function test_deadline_shows_urgency_and_overdue_markers(): void
+    {
+        $user = User::factory()->create();
+
+        $lewat = $user->projects()->create([
+            'name' => 'Sudah Lewat', 'status' => 'berjalan', 'deadline' => now()->subDays(2),
+        ]);
+        $mepet = $user->projects()->create([
+            'name' => 'Mepet', 'status' => 'berjalan', 'deadline' => now()->addDays(3),
+        ]);
+        $santai = $user->projects()->create([
+            'name' => 'Masih Lama', 'status' => 'berjalan', 'deadline' => now()->addDays(60),
+        ]);
+
+        $this->assertSame('lewat 2 hari', $lewat->deadline_label);
+        $this->assertSame('overdue', $lewat->deadline_tone);
+
+        $this->assertSame('3 hari lagi', $mepet->deadline_label);
+        $this->assertSame('soon', $mepet->deadline_tone);
+
+        $this->assertNull($santai->deadline_label);
+
+        $this->actingAs($user)->get('/projects')
+            ->assertOk()
+            ->assertSee('lewat 2 hari')
+            ->assertSee('3 hari lagi');
+    }
+
+    public function test_finished_projects_are_not_chased_by_deadline(): void
+    {
+        $user = User::factory()->create();
+
+        $selesai = $user->projects()->create([
+            'name' => 'Sudah Selesai', 'status' => 'selesai', 'deadline' => now()->subDays(5),
+        ]);
+        $batal = $user->projects()->create([
+            'name' => 'Dibatalkan', 'status' => 'batal', 'deadline' => now()->subDays(5),
+        ]);
+
+        $this->assertNull($selesai->deadline_label);
+        $this->assertNull($batal->deadline_label);
+    }
+
     public function test_uploaded_files_are_categorised_automatically(): void
     {
         Storage::fake('local');

@@ -11,8 +11,15 @@
             <h1 class="page-title">{{ $project->name }}</h1>
             <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
                 <x-status-badge :status="$project->status" />
-                <span class="figure">
-                    {{ $project->deadline ? 'Deadline '.$project->deadline->translatedFormat('d M Y') : 'Tanpa deadline' }}
+                <span class="figure flex items-center gap-2">
+                    <span>{{ $project->deadline ? 'Deadline '.$project->deadline->translatedFormat('d M Y') : 'Tanpa deadline' }}</span>
+                    @if ($project->deadline_label)
+                        <span @class([
+                            'font-medium',
+                            'text-red-600 dark:text-red-400' => $project->deadline_tone === 'overdue',
+                            'text-amber-600 dark:text-amber-400' => $project->deadline_tone === 'soon',
+                        ])>{{ $project->deadline_label }}</span>
+                    @endif
                 </span>
             </div>
         </div>

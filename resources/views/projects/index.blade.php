@@ -20,7 +20,7 @@
             <svg class="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-zinc-400 dark:text-zinc-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round">
                 <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
             </svg>
-            <input type="search" name="q" value="{{ request('q') }}" placeholder="Cari nama project"
+            <input type="search" name="q" value="{{ request('q') }}" placeholder="Cari project atau nama berkas"
                    class="field-input pl-8">
         </div>
 
@@ -44,8 +44,15 @@
                 <div class="flex items-center justify-between gap-4">
                     <div class="min-w-0">
                         <h3 class="truncate text-[15px] font-medium text-zinc-900 dark:text-zinc-100">{{ $project->name }}</h3>
-                        <p class="figure mt-0.5">
-                            {{ $project->deadline?->translatedFormat('d M Y') ?? '—' }}
+                        <p class="figure mt-0.5 flex items-center gap-2">
+                            <span>{{ $project->deadline?->translatedFormat('d M Y') ?? '—' }}</span>
+                            @if ($project->deadline_label)
+                                <span @class([
+                                    'font-medium',
+                                    'text-red-600 dark:text-red-400' => $project->deadline_tone === 'overdue',
+                                    'text-amber-600 dark:text-amber-400' => $project->deadline_tone === 'soon',
+                                ])>{{ $project->deadline_label }}</span>
+                            @endif
                         </p>
                     </div>
                     <div class="flex shrink-0 items-center gap-3">
@@ -55,6 +62,16 @@
                         </svg>
                     </div>
                 </div>
+
+                @if ($search && $project->files->isNotEmpty())
+                    <ul class="mt-2 space-y-0.5 border-l-2 border-zinc-200 pl-3 dark:border-zinc-700">
+                        @foreach ($project->files as $file)
+                            <li class="figure truncate text-[12px] text-zinc-500 dark:text-zinc-400">
+                                {{ $file->original_name }}
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
             </a>
         @empty
             <p class="empty-state">

@@ -14,21 +14,37 @@ class ProjectController extends Controller
 {
     public function index(Request $request): View
     {
+        $search = $request->string('q')->trim()->value();
+
         $projects = $request->user()->projects()
-            ->when($request->string('q')->trim()->value(), function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%");
+            ->when($search, function ($query, $search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('name', 'like', "%{$search}%")
+                        ->orWhereHas('files', function ($query) use ($search) {
+                            $query->where('original_name', 'like', "%{$search}%");
+                        });
+                });
             })
             ->when($request->string('status')->value(), function ($query, $status) {
                 $query->where('status', $status);
             })
+            // Yang sudah lewat dan paling mepet naik ke atas; tanpa deadline paling bawah.
             ->orderByRaw('deadline is null')
             ->orderBy('deadline')
             ->latest('id')
             ->get();
 
+        // Saat mencari, tunjukkan berkas mana yang cocok supaya jelas kenapa project ini muncul.
+        if ($search !== null && $search !== '') {
+            $projects->load(['files' => function ($query) use ($search) {
+                $query->where('original_name', 'like', "%{$search}%")->limit(4);
+            }]);
+        }
+
         return view('projects.index', [
             'projects' => $projects,
             'statuses' => Project::STATUSES,
+            'search' => $search,
         ]);
     }
 
