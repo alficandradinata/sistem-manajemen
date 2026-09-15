@@ -1,17 +1,16 @@
 <x-app-layout title="Project Baru">
-    <a href="{{ route('projects.index') }}"
-       class="back-link">
-        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <a href="{{ route('projects.index') }}" class="back-link">
+        <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="m15 18-6-6 6-6"/>
         </svg>
-        Kembali
+        Semua project
     </a>
 
-    <h1 class="page-title mb-4">Project Baru</h1>
+    <h1 class="page-title mb-6">Project Baru</h1>
 
-    <form method="POST" action="{{ route('projects.store') }}" class="card-pad">
+    <form method="POST" action="{{ route('projects.store') }}" class="panel-pad max-w-xl">
         @csrf
         <x-project-form :statuses="$statuses" />
-        <button type="submit" class="btn btn-primary btn-block">Simpan</button>
+        <button type="submit" class="btn btn-primary">Simpan</button>
     </form>
 </x-app-layout>

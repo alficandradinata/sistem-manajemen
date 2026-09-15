@@ -170,8 +170,8 @@ class ProjectFlowTest extends TestCase
             ->assertOk()
             ->assertSee('Rumah Bu Sari')
             ->assertSee('Berjalan')
-            ->assertSee('Unggah dari perangkat')
-            ->assertSee('Ambil dari Google Drive');
+            ->assertSee('Dari perangkat')
+            ->assertSee('Dari Google Drive');
     }
 
     public function test_dashboard_filters_by_search_and_status(): void
@@ -612,7 +612,7 @@ class ProjectFlowTest extends TestCase
             ->get(route('prices.index'))
             ->assertOk()
             ->assertSee('Keramik 60x60')
-            ->assertSee('Rp150.000');
+            ->assertSee('150.000');
 
         $this->assertSame($user->id, PriceReference::first()->user_id);
     }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Masuk — Sistem Datalaila</title>
+    <title>Masuk — Datalaila</title>
     <script>
         if (localStorage.theme === 'dark'
             || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -14,19 +14,15 @@
 </head>
 <body class="h-full">
     <div class="flex min-h-full items-center justify-center px-4 py-12">
-        <div class="w-full max-w-sm">
-            <div class="mb-9 text-center">
-                <svg class="mx-auto mb-5 h-10 w-10 text-slate-900 dark:text-slate-100" viewBox="0 0 40 40" fill="none"
-                     stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M4 19 20 6l16 13"/>
-                    <path d="M9 23v11h22V23"/>
-                </svg>
-                <h1 class="text-sm font-medium tracking-[0.25em] text-slate-900 uppercase dark:text-slate-100">Datalaila</h1>
-                <div class="mx-auto my-3.5 h-px w-8 bg-slate-200 dark:bg-slate-800"></div>
-                <p class="text-xs tracking-wide text-slate-400">Manajemen file &amp; harga project</p>
+        <div class="w-full max-w-[340px]">
+            <div class="mb-8">
+                <h1 class="text-[19px] font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">Datalaila</h1>
+                <p class="mt-1 font-mono text-[12px] text-zinc-400 dark:text-zinc-600">
+                    manajemen berkas &amp; harga project
+                </p>
             </div>
 
-            <form method="POST" action="{{ route('login') }}" class="card-pad">
+            <form method="POST" action="{{ route('login') }}">
                 @csrf
 
                 @if ($errors->any())
@@ -35,16 +31,16 @@
 
                 <label for="email" class="field-label">Email</label>
                 <input id="email" name="email" type="email" value="{{ old('email') }}" required autofocus
-                       autocomplete="username" inputmode="email" class="field-input mb-4">
+                       autocomplete="username" inputmode="email" class="field-input mb-3.5">
 
                 <label for="password" class="field-label">Kata sandi</label>
                 <input id="password" name="password" type="password" required
                        autocomplete="current-password" class="field-input mb-4">
 
-                <label class="mb-5 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                <label class="mb-5 flex cursor-pointer items-center gap-2 text-[13px] text-zinc-600 dark:text-zinc-400">
                     <input type="checkbox" name="remember" value="1"
-                           class="size-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900
-                           dark:border-slate-700 dark:bg-slate-900">
+                           class="size-3.5 rounded-sm border-zinc-300 text-zinc-900 focus:ring-1 focus:ring-blue-600/30
+                           dark:border-zinc-700 dark:bg-zinc-900">
                     Ingat saya
                 </label>
 
